@@ -284,17 +284,35 @@ function calculateTrade() {
     }
 
     // ✅ Trade Recommendation Logic
-    let intrinsicValue = optionType === 'CE' ? SpotPrice - strikePrice : strikePrice - SpotPrice;
+let intrinsicValue = optionType === 'CE' ? SpotPrice - strikePrice : strikePrice - SpotPrice;
 
-    let isGoodToTrade = (delta > 0.50 && iv < 30 && intrinsicValue > 0) &&
-                        ((optionType === 'CE' && (buildup === "Long Buildup" || buildup === "Short Covering")) ||
-                         (optionType === 'PE' && (buildup === "Short Buildup" || buildup === "Long Unwinding")));
+let isGoodToTrade = (delta > 0.50 && iv < 30 && intrinsicValue > 0) &&
+                    ((optionType === 'CE' && (buildup === "Long Buildup" || buildup === "Short Covering")) ||
+                     (optionType === 'PE' && (buildup === "Short Buildup" || buildup === "Long Unwinding")));
 
-    let recommendation = isGoodToTrade ? 'Good to Trade ✅' : 'Not Recommended ⚠️ - Take your call';
-    let recommendationBox = document.getElementById("tradeRecommendation");
+let isModerateTrade = (delta >= 0.40 && delta <= 0.50 && iv >= 30 && iv <= 40 && intrinsicValue >= -5) &&
+                      ((optionType === 'CE' && (buildup === "Long Buildup" || buildup === "Short Covering")) ||
+                       (optionType === 'PE' && (buildup === "Short Buildup" || buildup === "Long Unwinding")));
 
-    recommendationBox.innerText = recommendation;
-    recommendationBox.className = isGoodToTrade ? 'result-box bg-success' : 'result-box bg-warning';
+let recommendation;
+let className;
+
+if (isGoodToTrade) {
+    recommendation = 'Strong Buy ✅';
+    className = 'result-box bg-success';
+} else if (isModerateTrade) {
+    recommendation = 'Moderate Buy ⚠️ - Take your call';
+    className = 'result-box bg-warning';
+} else {
+    recommendation = 'Not Recommended ❌ - Avoid Trade';
+    className = 'result-box bg-danger';
+}
+
+// ✅ Updating the UI with the recommendation
+let recommendationBox = document.getElementById("tradeRecommendation");
+recommendationBox.innerText = recommendation;
+recommendationBox.className = className;
+
 
     // ✅ Entry & Stop Loss Calculation (3 Levels)
     let entry1 = (ltp * 1.0015).toFixed(2);
