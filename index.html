@@ -9,6 +9,7 @@
         font-family: Arial, sans-serif;
         background-color: #f8f9fa;
         padding: 20px;
+        font-size: 12px;
     }
     .container {
         background-color: #ffffff;
@@ -21,6 +22,10 @@
     h2 {
         color: #007bff;
         text-align: center;
+        font-size: 12px;
+    }
+    label, input, select, button {
+        font-size: 12px;
     }
     .form-group {
         display: flex;
@@ -36,17 +41,21 @@
     }
     input, select, button {
         width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
+        padding: 4px; /* Reduce padding for smaller height */
+        font-size: 12px; /* Reduce text size */
+        height: 25px; /* Adjust height to make input boxes smaller */
+        margin-bottom: 4px;
         box-sizing: border-box;
     }
+
     .btn {
         background-color: #007bff;
         color: #fff;
         border: none;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 12px;
         border-radius: 5px;
+        padding: 8px;
     }
     .btn-secondary {
         background-color: #adb5bd;
@@ -57,6 +66,7 @@
         font-weight: bold;
         text-align: center;
         margin-bottom: 10px;
+        font-size: 12px;
     }
     .bg-success {
         background-color: #d4edda;
@@ -66,7 +76,8 @@
         background-color: #f8d7da;
         color: #721c24;
     }
-</style>
+    </style>
+</head>
 
 <div class="container">
     <h2>Options Trade Calculator 📈</h2>
@@ -156,6 +167,14 @@
 
     <h3>Buildup Analysis:</h3>
     <div id="buildupAnalysis" class="result-box"></div>
+    
+    <!-- ✅ Breakeven Point Section -->
+    <h3>Breakeven Point:</h3>
+    <div id="breakevenPoint" class="result-box"></div>
+
+    <!-- ✅ Probability of Profit (POP) Section -->
+    <h3>Probability of Profit (POP):</h3>
+    <div id="popValue" class="result-box"></div>
 
     <!-- ✅ Disclaimer Section -->
     <div class="container mt-4" style="
@@ -165,7 +184,7 @@
         border-radius: 5px;
     ">
         <h5 class="text-danger" style="margin-bottom: 10px;">Disclaimer:</h5>
-        <p class="text-muted" style="font-size: 14px; line-height: 1.6;">
+        <p class="text-muted" style="font-size: 12px; line-height: 1.6;">
             This Options Trade Calculator is for informational and educational purposes only. It does not constitute financial advice, 
             investment recommendations, or a solicitation to buy or sell any securities. Trading in options and other financial instruments 
             involves significant risk and may not be suitable for all investors. Users are advised to conduct their own research and consult 
@@ -187,8 +206,38 @@ function calculateTrade() {
     let delta = parseFloat(document.getElementById("delta").value);
     let gamma = parseFloat(document.getElementById("gamma").value);
     let iv = parseFloat(document.getElementById("iv").value);
-
     let spotMoves = document.getElementById("spotMoves").value.split(',').map(Number);
+
+    // ✅ POP Calculation (Using Delta)
+    let pop = (1 - delta) * 100; 
+
+    // ✅ Display POP Result
+    document.getElementById("popValue").innerHTML = `
+        <strong>Estimated Probability of Profit (POP):</strong> ${pop.toFixed(2)}%
+    `;
+
+    // ✅ Styling for POP section
+    let popBox = document.getElementById("popValue");
+    popBox.className = 'result-box';
+    popBox.style.backgroundColor = "#fff3cd"; // Light yellow background
+    popBox.style.color = "#856404"; // Dark yellow text
+
+    // ✅ Breakeven Point Calculation
+    let breakevenPrice;
+    if (optionType === 'CE') {
+        breakevenPrice = (strikePrice + ltp).toFixed(2);
+    } else {
+        breakevenPrice = (strikePrice - ltp).toFixed(2);
+    }
+
+    document.getElementById("breakevenPoint").innerHTML = `
+        <strong>Breakeven Price:</strong> ₹${breakevenPrice}
+    `;
+
+    let breakevenBox = document.getElementById("breakevenPoint");
+    breakevenBox.className = 'result-box';
+    breakevenBox.style.backgroundColor = "#e6f7ff"; // Light blue background
+    breakevenBox.style.color = "#004085"; // Dark blue text
 
     // ✅ Premium Projection
     document.getElementById("premiumProjection").innerHTML = spotMoves
@@ -198,34 +247,33 @@ function calculateTrade() {
     // ✅ Buildup Analysis with Color Coding
     let spotChange = FuturesPrice - previousFuturesPrice;
     let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
-              (spotChange > 0 && oiChange < 0) ? "Short Covering" :
-              (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
-              (spotChange < 0 && oiChange < 0) ? "Long Unwinding" :
-              "No Significant Buildup";
+                  (spotChange > 0 && oiChange < 0) ? "Short Covering" :
+                  (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
+                  (spotChange < 0 && oiChange < 0) ? "Long Unwinding" :
+                  "No Significant Buildup";
 
     let buildupBox = document.getElementById("buildupAnalysis");
     buildupBox.innerText = buildup;
+    buildupBox.className = 'result-box';
 
-buildupBox.className = 'result-box'; // Reset previous classes
+    if (buildup === "Long Buildup") {
+        buildupBox.style.backgroundColor = "#d4edda"; // Light green
+        buildupBox.style.color = "#155724"; // Dark green
+    } else if (buildup === "Short Covering") {
+        buildupBox.style.backgroundColor = "#cce5ff"; // Light blue
+        buildupBox.style.color = "#004085"; // Dark blue
+    } else if (buildup === "Short Buildup") {
+        buildupBox.style.backgroundColor = "#f8d7da"; // Light red
+        buildupBox.style.color = "#721c24"; // Dark red
+    } else if (buildup === "Long Unwinding") {
+        buildupBox.style.backgroundColor = "#fff3cd"; // Light orange
+        buildupBox.style.color = "#856404"; // Dark orange
+    } else {
+        buildupBox.style.backgroundColor = "#f1f1f1"; // Light grey
+        buildupBox.style.color = "#6c757d"; // Grey text
+    }
 
-if (buildup === "Long Buildup") {
-    buildupBox.style.backgroundColor = "#d4edda"; // Light green
-    buildupBox.style.color = "#155724"; // Dark green
-} else if (buildup === "Short Covering") {
-    buildupBox.style.backgroundColor = "#cce5ff"; // Light blue
-    buildupBox.style.color = "#004085"; // Dark blue
-} else if (buildup === "Short Buildup") {
-    buildupBox.style.backgroundColor = "#f8d7da"; // Light red
-    buildupBox.style.color = "#721c24"; // Dark red
-} else if (buildup === "Long Unwinding") {
-    buildupBox.style.backgroundColor = "#fff3cd"; // Light orange
-    buildupBox.style.color = "#856404"; // Dark orange
-} else {
-    buildupBox.style.backgroundColor = "#f1f1f1"; // Light grey
-    buildupBox.style.color = "#6c757d"; // Grey text
-}
-
-    // ✅ Trade Recommendation Logic with Buildup Alignment
+    // ✅ Trade Recommendation Logic
     let intrinsicValue = optionType === 'CE' ? FuturesPrice - strikePrice : strikePrice - FuturesPrice;
 
     let isGoodToTrade = (delta > 0.50 && iv < 30 && intrinsicValue > 0) &&
@@ -239,24 +287,25 @@ if (buildup === "Long Buildup") {
     recommendationBox.className = isGoodToTrade ? 'result-box bg-success' : 'result-box bg-warning';
 
     // ✅ Entry & Stop Loss Calculation (3 Levels)
-let entry1 = (ltp * 1.0015).toFixed(2);
-let stopLoss1 = (entry1 * 0.97).toFixed(2);
-let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
+    let entry1 = (ltp * 1.0015).toFixed(2);
+    let stopLoss1 = (entry1 * 0.97).toFixed(2);
+    let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
 
-let entry2 = (ltp * 1.03).toFixed(2);
-let stopLoss2 = (entry2 * 0.95).toFixed(2);
-let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
+    let entry2 = (ltp * 1.03).toFixed(2);
+    let stopLoss2 = (entry2 * 0.95).toFixed(2);
+    let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
 
-let entry3 = (ltp * 1.05).toFixed(2);
-let stopLoss3 = (entry3 * 0.93).toFixed(2);
-let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
+    let entry3 = (ltp * 1.05).toFixed(2);
+    let stopLoss3 = (entry3 * 0.93).toFixed(2);
+    let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
 
-document.getElementById("tradeLevels").innerHTML = `
-    <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
-    <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
-    <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
-`;
+    document.getElementById("tradeLevels").innerHTML = `
+        <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
+        <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
+        <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
+    `;
 }
+
 
 function resetForm() {
     document.querySelectorAll('input').forEach(input => input.value = "");
