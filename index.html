@@ -93,16 +93,7 @@
             <label for="stockName">Stock Name</label>
             <input type="text" id="stockName" placeholder="Enter Stock Name" />
         </div>
-        <div>
-    <label for="expiryDate">Expiry Date</label>
-    <input type="date" id="expiryDate" onchange="calculateDaysLeft()" />
-</div>
-
-<div>
-    <label for="daysLeft">Days Left to Trade</label>
-    <input type="text" id="daysLeft" readonly />
-</div>
-    </div>
+        </div>
 
     <div class="form-group">
         <div>
@@ -233,14 +224,7 @@ function calculateTrade() {
     let iv = parseFloat(document.getElementById("iv").value);
     let SpotMoves = document.getElementById("SpotMoves").value.split(',').map(Number);
 
-    // Calculate difference in days
-    let timeDiff = expiryDate - today;
-    let daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-    // Display days left (ensure it doesn't show negative values)
-    document.getElementById("daysLeft").value = daysLeft >= 0 ? daysLeft : "Expired";
-    }
-    
+     
     // ✅ POP Calculation (Using Delta)
     let pop = (1 - delta) * 100; 
 
