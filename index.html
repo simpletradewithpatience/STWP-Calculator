@@ -4,141 +4,180 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Options Trade Calculator</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-
     <style>
-        body {
-            background-color: #f0f8ff;
-            font-family: 'Arial', sans-serif;
-        }
-        .container {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-        }
-        .form-label {
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-        .btn-primary {
-            background-color: #6f42c1;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #5a2e92;
-        }
-        .result-box {
-            padding: 15px;
-            font-weight: bold;
-            text-align: center;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .Good to Trade {
-            background-color: #d4edda !important;
-            color: #155724 !important;
-        }
-        .Not Recommended - Take your call {
-            background-color: #fff3cd !important;
-            color: #856404 !important;
-        }
-    </style>
-</head>
-<body>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+    .container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin: auto;
+        max-width: 600px;
+    }
+    h2 {
+        color: #007bff;
+        text-align: center;
+    }
+    .form-group {
+        display: flex;
+        gap: 10px;
+    }
+    .form-group > div {
+        flex: 1;
+    }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    input, select, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    .btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+    }
+    .btn-secondary {
+        background-color: #adb5bd;
+    }
+    .result-box {
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .bg-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .bg-warning {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
 
-<div class="container mt-5">
-    <h2 class="text-center text-danger">Options Trade Calculator 📈</h2>
-
-    <!-- Form Fields -->
-    <div class="mb-3">
-        <label for="stockName" class="form-label text-primary">Stock Name</label>
-        <input type="text" class="form-control" id="stockName" placeholder="Enter Stock Name">
-    </div>
-    <div class="mb-3">
-        <label for="FuturesPrice" class="form-label text-primary">Futures Price</label>
-        <input type="number" class="form-control" id="FuturesPrice" placeholder="Enter Futures Price">
-    </div>
-    <div class="mb-3">
-        <label for="previousFuturesPrice" class="form-label text-primary">Previous Futures Price</label>
-        <input type="number" class="form-control" id="previousFuturesPrice" placeholder="Enter Previous Futures Price">
-    </div>
-    <div class="mb-3">
-        <label for="strikePrice" class="form-label text-primary">Strike Price</label>
-        <input type="number" class="form-control" id="strikePrice" placeholder="Enter Strike Price">
-    </div>
-    <div class="mb-3">
-        <label for="optionType" class="form-label text-primary">Option Type</label>
-        <select class="form-control" id="optionType">
-            <option value="CE">Call (CE)</option>
-            <option value="PE">Put (PE)</option>
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="ltp" class="form-label text-primary">Last Traded Price (LTP/Premium)</label>
-        <input type="number" class="form-control" id="ltp" placeholder="Enter LTP">
-    </div>
-    <div class="mb-3">
-        <label for="oiChange" class="form-label text-primary">Open Interest Change</label>
-        <input type="number" class="form-control" id="oiChange" placeholder="Enter OI Change">
-    </div>
-    <div class="mb-3">
-        <label for="delta" class="form-label text-primary">Delta</label>
-        <input type="number" class="form-control" id="delta" placeholder="Enter Delta" step="0.01">
-    </div>
-    <div class="mb-3">
-        <label for="gamma" class="form-label text-primary">Gamma</label>
-        <input type="number" class="form-control" id="gamma" placeholder="Enter Gamma" step="0.0001">
-    </div>
-    <div class="mb-3">
-        <label for="iv" class="form-label text-primary">Implied Volatility (IV)</label>
-        <input type="number" class="form-control" id="iv" placeholder="Enter IV">
-    </div>
-    <div class="mb-3">
-    	<label for="expiryDate" class="form-label text-primary">Expiry Date</label>
-    	<input type="date" class="form-control" id="expiryDate">
-    </div>
-    <div class="mb-3">
-    	<label for="spotMoves" class="form-label text-primary">Expected Spot Movements (comma-separated)</label>
-    	<input type="text" class="form-control" id="spotMoves" placeholder="e.g., 50,100,150">
-    </div>
+<div class="container">
+    <h2>Options Trade Calculator 📈</h2>
     
-     <button class="btn btn-primary mt-3" onclick="calculateTrade()">Calculate</button>
-     <button class="btn btn-secondary mt-3 ms-2" onclick="resetForm()">Reset</button>
+    <div class="form-group">
+        <div>
+            <label for="stockName">Stock Name</label>
+            <input type="text" id="stockName" placeholder="Enter Stock Name" />
+        </div>
+        <div>
+            <label for="expiryDate">Expiry Date</label>
+            <input type="date" id="expiryDate" />
+        </div>
+    </div>
 
-    <!-- Trade Recommendation -->
-    <h3 class="mt-4 text-success">Trade Recommendation for <span id="stockDisplay"></span>:</h3>
+    <div class="form-group">
+        <div>
+            <label>Futures Price</label>
+            <input type="number" id="FuturesPrice" placeholder="Enter Futures Price" />
+        </div>
+        <div>
+            <label>Previous Futures Price</label>
+            <input type="number" id="previousFuturesPrice" placeholder="Enter Previous Futures Price" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div>
+            <label>Strike Price</label>
+            <input type="number" id="strikePrice" placeholder="Enter Strike Price" />
+        </div>
+        <div>
+            <label>Option Type</label>
+            <select id="optionType">
+                <option value="CE">Call (CE)</option>
+                <option value="PE">Put (PE)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div>
+            <label>LTP (Premium)</label>
+            <input type="number" id="ltp" placeholder="Enter LTP" />
+        </div>
+        <div>
+            <label>OI Change</label>
+            <input type="number" id="oiChange" placeholder="Enter OI Change" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div>
+            <label>Delta</label>
+            <input type="number" id="delta" step="0.01" placeholder="Enter Delta" />
+        </div>
+        <div>
+            <label>Gamma</label>
+            <input type="number" id="gamma" step="0.0001" placeholder="Enter Gamma" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div>
+            <label>IV</label>
+            <input type="number" id="iv" placeholder="Enter IV" />
+        </div>
+        <div>
+            <label>Expected Spot Moves (comma)</label>
+            <input type="text" id="spotMoves" placeholder="e.g., 50,100,150" />
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <button class="btn" onclick="calculateTrade()">Calculate</button>
+    <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+
+    <!-- Results -->
+    <h3>Trade Recommendation:</h3>
     <div id="tradeRecommendation" class="result-box"></div>
 
-    <!-- Premium Projection -->
-    <h3 class="mt-4 text-primary">Premium Projection Based on Spot Movement:</h3>
-    <div id="premiumProjection" class="result-box bg-light"></div>
+    <h3>Premium Projection Based on Spot Movement:</h3>
+    <div id="premiumProjection" class="result-box"></div>
 
-    <!-- Trade Levels -->
-    <h3 class="mt-4 text-primary">Trade Analysis:</h3>
+    <h3>Trade Analysis:</h3>
     <div id="tradeLevels" class="result-box"></div>
 
-    <!-- Buildup Analysis -->
-    <h3 class="mt-4 text-primary">Buildup Analysis:</h3>
+    <h3>Buildup Analysis:</h3>
     <div id="buildupAnalysis" class="result-box"></div>
+
+    <!-- ✅ Disclaimer Section -->
+    <div class="container mt-4" style="
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+    ">
+        <h5 class="text-danger" style="margin-bottom: 10px;">Disclaimer:</h5>
+        <p class="text-muted" style="font-size: 14px; line-height: 1.6;">
+            This Options Trade Calculator is for informational and educational purposes only. It does not constitute financial advice, 
+            investment recommendations, or a solicitation to buy or sell any securities. Trading in options and other financial instruments 
+            involves significant risk and may not be suitable for all investors. Users are advised to conduct their own research and consult 
+            with a financial advisor before making any trading decisions. The creators of this tool are not responsible for any financial losses 
+            incurred due to the use of this calculator.
+        </p>
+    </div>
 </div>
 
-<!-- Disclaimer Section -->
-<div class="container mt-4">
-    <h5 class="text-danger">Disclaimer:</h5>
-    <p class="text-muted">
-        This Options Trade Calculator is for informational and educational purposes only. It does not constitute financial advice, 
-        investment recommendations, or a solicitation to buy or sell any securities. Trading in options and other financial instruments 
-        involves significant risk and may not be suitable for all investors. Users are advised to conduct their own research and consult 
-        with a financial advisor before making any trading decisions. The creators of this tool are not responsible for any financial losses 
-        incurred due to the use of this calculator.
-    </p>
-</div>
 
-<!-- JavaScript -->
 <script>
-    function calculateTrade() {
-    let stockName = document.getElementById("stockName").value.trim();
+function calculateTrade() {
     let FuturesPrice = parseFloat(document.getElementById("FuturesPrice").value);
     let previousFuturesPrice = parseFloat(document.getElementById("previousFuturesPrice").value);
     let strikePrice = parseFloat(document.getElementById("strikePrice").value);
@@ -148,14 +187,8 @@
     let delta = parseFloat(document.getElementById("delta").value);
     let gamma = parseFloat(document.getElementById("gamma").value);
     let iv = parseFloat(document.getElementById("iv").value);
-    let spotMoves = document.getElementById("spotMoves").value.split(",").map(x => parseFloat(x.trim()));
-    let expiryDate = new Date(document.getElementById("expiryDate").value);
-    let today = new Date();
 
-    // ✅ Calculate Days to Expiry
-    let daysToExpiry = Math.max(0, Math.round((expiryDate - today) / (1000 * 60 * 60 * 24)));
-    
-    document.getElementById("stockDisplay").textContent = stockName;
+    let spotMoves = document.getElementById("spotMoves").value.split(',').map(Number);
 
     // ✅ Premium Projection
     document.getElementById("premiumProjection").innerHTML = spotMoves
@@ -167,7 +200,7 @@
     let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
                   (spotChange > 0 && oiChange < 0) ? "Short Covering" :
                   (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
-                  (spotChange < 0 && oiChange < 0) ? "Long Unwinding" : 
+                  (spotChange < 0 && oiChange < 0) ? "Long Unwinding" :
                   "No Significant Buildup";
     document.getElementById("buildupAnalysis").innerText = buildup;
 
@@ -182,51 +215,31 @@
     let recommendationBox = document.getElementById("tradeRecommendation");
 
     recommendationBox.innerText = recommendation;
-    recommendationBox.className = 
-        isGoodToTrade ? 'result-box bg-success text-white' : 'result-box bg-warning text-dark';
+    recommendationBox.className = isGoodToTrade ? 'result-box bg-success' : 'result-box bg-warning';
 
     // ✅ Entry & Stop Loss Calculation (3 Levels)
-    let entry1 = (ltp * 1.0015).toFixed(2);
-    let stopLoss1 = (entry1 * 0.97).toFixed(2);
-    let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
+let entry1 = (ltp * 1.0015).toFixed(2);
+let stopLoss1 = (entry1 * 0.97).toFixed(2);
+let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
 
-    let entry2 = (ltp * 1.03).toFixed(2);
-    let stopLoss2 = (entry2 * 0.95).toFixed(2);
-    let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
+let entry2 = (ltp * 1.03).toFixed(2);
+let stopLoss2 = (entry2 * 0.95).toFixed(2);
+let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
 
-    let entry3 = (ltp * 1.05).toFixed(2);
-    let stopLoss3 = (entry3 * 0.93).toFixed(2);
-    let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
+let entry3 = (ltp * 1.05).toFixed(2);
+let stopLoss3 = (entry3 * 0.93).toFixed(2);
+let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
 
-    document.getElementById("tradeLevels").innerHTML = `
-        <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
-        <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
-        <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
-    `;
+document.getElementById("tradeLevels").innerHTML = `
+    <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
+    <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
+    <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
+`;
 }
 
-// ✅ Reset Form
 function resetForm() {
-    document.getElementById("stockName").value = '';
-    document.getElementById("FuturesPrice").value = '';
-    document.getElementById("previousFuturesPrice").value = '';
-    document.getElementById("strikePrice").value = '';
-    document.getElementById("optionType").value = 'CE';
-    document.getElementById("ltp").value = '';
-    document.getElementById("oiChange").value = '';
-    document.getElementById("delta").value = '';
-    document.getElementById("gamma").value = '';
-    document.getElementById("iv").value = '';
-    document.getElementById("spotMoves").value = '';
-    document.getElementById("expiryDate").value = '';
-    
-    document.getElementById("tradeRecommendation").innerText = '';
-    document.getElementById("tradeRecommendation").className = 'result-box';
-    document.getElementById("premiumProjection").innerText = '';
-    document.getElementById("tradeLevels").innerText = '';
-    document.getElementById("buildupAnalysis").innerText = '';
+    document.querySelectorAll('input').forEach(input => input.value = "");
 }
-
 </script>
 
 </body>
