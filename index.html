@@ -95,12 +95,12 @@
 
     <div class="form-group">
         <div>
-            <label>Futures Price</label>
-            <input type="number" id="FuturesPrice" placeholder="Enter Futures Price" />
+            <label>Spot Price</label>
+            <input type="number" id="SpotPrice" placeholder="Enter Spot Price" />
         </div>
         <div>
-            <label>Previous Futures Price</label>
-            <input type="number" id="previousFuturesPrice" placeholder="Enter Previous Futures Price" />
+            <label>Previous Spot Price</label>
+            <input type="number" id="previousSpotPrice" placeholder="Enter Previous Spot Price" />
         </div>
     </div>
 
@@ -197,8 +197,8 @@
 
 <script>
 function calculateTrade() {
-    let FuturesPrice = parseFloat(document.getElementById("FuturesPrice").value);
-    let previousFuturesPrice = parseFloat(document.getElementById("previousFuturesPrice").value);
+    let SpotPrice = parseFloat(document.getElementById("SpotPrice").value);
+    let previousSpotPrice = parseFloat(document.getElementById("previousSpotPrice").value);
     let strikePrice = parseFloat(document.getElementById("strikePrice").value);
     let optionType = document.getElementById("optionType").value;
     let ltp = parseFloat(document.getElementById("ltp").value);
@@ -245,7 +245,7 @@ function calculateTrade() {
         .join('<br>');
 
     // ✅ Buildup Analysis with Color Coding
-    let spotChange = FuturesPrice - previousFuturesPrice;
+    let spotChange = SpotPrice - previousSpotPrice;
     let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
                   (spotChange > 0 && oiChange < 0) ? "Short Covering" :
                   (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
@@ -274,7 +274,7 @@ function calculateTrade() {
     }
 
     // ✅ Trade Recommendation Logic
-    let intrinsicValue = optionType === 'CE' ? FuturesPrice - strikePrice : strikePrice - FuturesPrice;
+    let intrinsicValue = optionType === 'CE' ? SpotPrice - strikePrice : strikePrice - SpotPrice;
 
     let isGoodToTrade = (delta > 0.50 && iv < 30 && intrinsicValue > 0) &&
                         ((optionType === 'CE' && (buildup === "Long Buildup" || buildup === "Short Covering")) ||
