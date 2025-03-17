@@ -195,14 +195,35 @@ function calculateTrade() {
         .map(move => `+${move} pts → ₹${(ltp + (delta * move) + (0.5 * gamma * Math.pow(move, 2))).toFixed(2)}`)
         .join('<br>');
 
-    // ✅ Buildup Analysis
+    // ✅ Buildup Analysis with Color Coding
     let spotChange = FuturesPrice - previousFuturesPrice;
     let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
-                  (spotChange > 0 && oiChange < 0) ? "Short Covering" :
-                  (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
-                  (spotChange < 0 && oiChange < 0) ? "Long Unwinding" :
-                  "No Significant Buildup";
-    document.getElementById("buildupAnalysis").innerText = buildup;
+              (spotChange > 0 && oiChange < 0) ? "Short Covering" :
+              (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
+              (spotChange < 0 && oiChange < 0) ? "Long Unwinding" :
+              "No Significant Buildup";
+
+    let buildupBox = document.getElementById("buildupAnalysis");
+    buildupBox.innerText = buildup;
+
+buildupBox.className = 'result-box'; // Reset previous classes
+
+if (buildup === "Long Buildup") {
+    buildupBox.style.backgroundColor = "#d4edda"; // Light green
+    buildupBox.style.color = "#155724"; // Dark green
+} else if (buildup === "Short Covering") {
+    buildupBox.style.backgroundColor = "#cce5ff"; // Light blue
+    buildupBox.style.color = "#004085"; // Dark blue
+} else if (buildup === "Short Buildup") {
+    buildupBox.style.backgroundColor = "#f8d7da"; // Light red
+    buildupBox.style.color = "#721c24"; // Dark red
+} else if (buildup === "Long Unwinding") {
+    buildupBox.style.backgroundColor = "#fff3cd"; // Light orange
+    buildupBox.style.color = "#856404"; // Dark orange
+} else {
+    buildupBox.style.backgroundColor = "#f1f1f1"; // Light grey
+    buildupBox.style.color = "#6c757d"; // Grey text
+}
 
     // ✅ Trade Recommendation Logic with Buildup Alignment
     let intrinsicValue = optionType === 'CE' ? FuturesPrice - strikePrice : strikePrice - FuturesPrice;
