@@ -95,11 +95,16 @@
         <input type="number" class="form-control" id="iv" placeholder="Enter IV">
     </div>
     <div class="mb-3">
-        <label for="spotMoves" class="form-label text-primary">Expected Spot Movements (comma-separated)</label>
-        <input type="text" class="form-control" id="spotMoves" placeholder="e.g., 50,100,150">
+    	<label for="expiryDate" class="form-label text-primary">Expiry Date</label>
+    	<input type="date" class="form-control" id="expiryDate">
+    </div>
+    <div class="mb-3">
+    	<label for="spotMoves" class="form-label text-primary">Expected Spot Movements (comma-separated)</label>
+    	<input type="text" class="form-control" id="spotMoves" placeholder="e.g., 50,100,150">
     </div>
     
-    <button class="btn btn-primary mt-3" onclick="calculateTrade()">Calculate</button>
+     <button class="btn btn-primary mt-3" onclick="calculateTrade()">Calculate</button>
+     <button class="btn btn-secondary mt-3 ms-2" onclick="resetForm()">Reset</button>
 
     <!-- Trade Recommendation -->
     <h3 class="mt-4 text-success">Trade Recommendation for <span id="stockDisplay"></span>:</h3>
@@ -133,63 +138,99 @@
 <!-- JavaScript -->
 <script>
     function calculateTrade() {
-        let stockName = document.getElementById("stockName").value.trim();
-        let FuturesPrice = parseFloat(document.getElementById("FuturesPrice").value);
-        let previousFuturesPrice = parseFloat(document.getElementById("previousFuturesPrice").value);
-        let strikePrice = parseFloat(document.getElementById("strikePrice").value);
-        let optionType = document.getElementById("optionType").value;
-        let ltp = parseFloat(document.getElementById("ltp").value);
-        let oiChange = parseFloat(document.getElementById("oiChange").value);
-        let delta = parseFloat(document.getElementById("delta").value);
-        let gamma = parseFloat(document.getElementById("gamma").value);
-        let iv = parseFloat(document.getElementById("iv").value);
-        let spotMoves = document.getElementById("spotMoves").value.split(",").map(x => parseFloat(x.trim()));
+    let stockName = document.getElementById("stockName").value.trim();
+    let FuturesPrice = parseFloat(document.getElementById("FuturesPrice").value);
+    let previousFuturesPrice = parseFloat(document.getElementById("previousFuturesPrice").value);
+    let strikePrice = parseFloat(document.getElementById("strikePrice").value);
+    let optionType = document.getElementById("optionType").value;
+    let ltp = parseFloat(document.getElementById("ltp").value);
+    let oiChange = parseFloat(document.getElementById("oiChange").value);
+    let delta = parseFloat(document.getElementById("delta").value);
+    let gamma = parseFloat(document.getElementById("gamma").value);
+    let iv = parseFloat(document.getElementById("iv").value);
+    let spotMoves = document.getElementById("spotMoves").value.split(",").map(x => parseFloat(x.trim()));
+    let expiryDate = new Date(document.getElementById("expiryDate").value);
+    let today = new Date();
 
-        document.getElementById("stockDisplay").textContent = stockName;
+    // ✅ Calculate Days to Expiry
+    let daysToExpiry = Math.max(0, Math.round((expiryDate - today) / (1000 * 60 * 60 * 24)));
+    
+    document.getElementById("stockDisplay").textContent = stockName;
 
-        // ✅ Premium Projection
-        document.getElementById("premiumProjection").innerHTML = spotMoves
-            .map(move => `+${move} pts → ₹${(ltp + (delta * move) + (0.5 * gamma * Math.pow(move, 2))).toFixed(2)}`)
-            .join('<br>');
+    // ✅ Premium Projection
+    document.getElementById("premiumProjection").innerHTML = spotMoves
+        .map(move => `+${move} pts → ₹${(ltp + (delta * move) + (0.5 * gamma * Math.pow(move, 2))).toFixed(2)}`)
+        .join('<br>');
 
-        // ✅ Buildup Analysis
-        let spotChange = FuturesPrice - previousFuturesPrice;
-        let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
-                      (spotChange > 0 && oiChange < 0) ? "Short Covering" :
-                      (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
-                      (spotChange < 0 && oiChange < 0) ? "Long Unwinding" : 
-                      "No Significant Buildup";
-        document.getElementById("buildupAnalysis").innerText = buildup;
+    // ✅ Buildup Analysis
+    let spotChange = FuturesPrice - previousFuturesPrice;
+    let buildup = (spotChange > 0 && oiChange > 0) ? "Long Buildup" :
+                  (spotChange > 0 && oiChange < 0) ? "Short Covering" :
+                  (spotChange < 0 && oiChange > 0) ? "Short Buildup" :
+                  (spotChange < 0 && oiChange < 0) ? "Long Unwinding" : 
+                  "No Significant Buildup";
+    document.getElementById("buildupAnalysis").innerText = buildup;
 
-        // ✅ Trade Recommendation
-        let intrinsicValue = optionType === 'CE' ? FuturesPrice - strikePrice : strikePrice - FuturesPrice;
-        let recommendation = (delta > 0.50 && iv < 30 && intrinsicValue > 0) ? 'Good to Trade ✅' : 'Not Recommended ⚠️ - Take your call';
+    // ✅ Trade Recommendation Logic with Buildup Alignment
+    let intrinsicValue = optionType === 'CE' ? FuturesPrice - strikePrice : strikePrice - FuturesPrice;
 
-        document.getElementById("tradeRecommendation").innerText = recommendation;
-        document.getElementById("tradeRecommendation").className = 
-            recommendation === 'Good to Trade ✅' ? 'result-box Good to Trade' : 'result-box Not Recommended ⚠️ - Take your call';
+    let isGoodToTrade = (delta > 0.50 && iv < 30 && intrinsicValue > 0) &&
+                        ((optionType === 'CE' && (buildup === "Long Buildup" || buildup === "Short Covering")) ||
+                         (optionType === 'PE' && (buildup === "Short Buildup" || buildup === "Long Unwinding")));
 
-	// ✅ Entry & Stop Loss Calculation (3 Levels)
-let entry1 = (ltp * 1.0015).toFixed(2);
-let stopLoss1 = (entry1 * 0.97).toFixed(2);
-let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
+    let recommendation = isGoodToTrade ? 'Good to Trade ✅' : 'Not Recommended ⚠️ - Take your call';
+    let recommendationBox = document.getElementById("tradeRecommendation");
 
-let entry2 = (ltp * 1.03).toFixed(2);
-let stopLoss2 = (entry2 * 0.95).toFixed(2);
-let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
+    recommendationBox.innerText = recommendation;
+    recommendationBox.className = 
+        isGoodToTrade ? 'result-box bg-success text-white' : 'result-box bg-warning text-dark';
 
-let entry3 = (ltp * 1.05).toFixed(2);
-let stopLoss3 = (entry3 * 0.93).toFixed(2);
-let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
+    // ✅ Entry & Stop Loss Calculation (3 Levels)
+    let entry1 = (ltp * 1.0015).toFixed(2);
+    let stopLoss1 = (entry1 * 0.97).toFixed(2);
+    let target1 = (parseFloat(entry1) + (delta * spotMoves[0])).toFixed(2);
 
-document.getElementById("tradeLevels").innerHTML = `
-    <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
-    <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
-    <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
-`;
+    let entry2 = (ltp * 1.03).toFixed(2);
+    let stopLoss2 = (entry2 * 0.95).toFixed(2);
+    let target2 = (parseFloat(entry2) + (delta * spotMoves[1])).toFixed(2);
 
-    }
+    let entry3 = (ltp * 1.05).toFixed(2);
+    let stopLoss3 = (entry3 * 0.93).toFixed(2);
+    let target3 = (parseFloat(entry3) + (delta * spotMoves[2])).toFixed(2);
+
+    document.getElementById("tradeLevels").innerHTML = `
+        <strong>Entry 1:</strong> ₹${entry1} | <strong>Stop Loss:</strong> ₹${stopLoss1} | <strong>Target:</strong> ₹${target1}<br>
+        <strong>Entry 2:</strong> ₹${entry2} | <strong>Stop Loss:</strong> ₹${stopLoss2} | <strong>Target:</strong> ₹${target2}<br>
+        <strong>Entry 3:</strong> ₹${entry3} | <strong>Stop Loss:</strong> ₹${stopLoss3} | <strong>Target:</strong> ₹${target3}
+    `;
+}
+
+// ✅ Reset Form
+function resetForm() {
+    document.getElementById("stockName").value = '';
+    document.getElementById("FuturesPrice").value = '';
+    document.getElementById("previousFuturesPrice").value = '';
+    document.getElementById("strikePrice").value = '';
+    document.getElementById("optionType").value = 'CE';
+    document.getElementById("ltp").value = '';
+    document.getElementById("oiChange").value = '';
+    document.getElementById("delta").value = '';
+    document.getElementById("gamma").value = '';
+    document.getElementById("iv").value = '';
+    document.getElementById("spotMoves").value = '';
+    document.getElementById("expiryDate").value = '';
+    
+    document.getElementById("tradeRecommendation").innerText = '';
+    document.getElementById("tradeRecommendation").className = 'result-box';
+    document.getElementById("premiumProjection").innerText = '';
+    document.getElementById("tradeLevels").innerText = '';
+    document.getElementById("buildupAnalysis").innerText = '';
+}
+
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
